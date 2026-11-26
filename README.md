@@ -36,21 +36,54 @@ Try it in a shell first: `grep . /sys/class/hwmon/hwmon*/name` shows each folder
 
 Each step should run and print something before you start the next one.
 
-- [ ] **1. Read one number.** Read the CPU temp file, turn it into a number of degrees, print it.
+- [x] **1. Read one number.** Read the CPU temp file, turn it into a number of degrees, print it.
       (Hint: `Deno.readTextFile`, then trim and parse.)
-- [ ] **2. Find sensors by name.** Write a function that takes a name like `"coretemp"` and returns
+- [x] **2. Find sensors by name.** Write a function that takes a name like `"coretemp"` and returns
       the folder path. (Hint: `Deno.readDir("/sys/class/hwmon")`.) What should it do if the name isn't there?
-- [ ] **3. Poll.** Print temp and fan once a second. (Hint: `setInterval`, or an `async` loop with a sleep.)
-- [ ] **4. Sparkline function.** Write `sparkline(values: number[], min: number, max: number): string`
+- [x] **3. Poll.** Print temp and fan once a second. (Hint: `setInterval`, or an `async` loop with a sleep.)
+- [x] **4. Sparkline function.** Write `sparkline(values: number[], min: number, max: number): string`
       using the characters `▁▂▃▄▅▆▇█`. Test it on a hard-coded array before wiring it up.
 - [ ] **5. History.** Keep the last 40 readings of each in an array. Drop the oldest when it's full.
 - [ ] **6. Redraw in place.** Instead of scrolling, redraw the same two lines each tick.
       (Hint: ANSI escape codes. `\x1b[2J\x1b[H` clears and moves to the top.)
 - [ ] **7. Quit cleanly.** Ctrl+C should leave the terminal tidy.
 
-## Stretch ideas
+## Growing it into the Boot.dev personal project (~40 hours)
 
-- Colour the temperature: green below 68°C, yellow to 90°C, red above (the same thresholds macfan uses).
-- Show the min/max/average over the window.
-- A `--once` flag that prints a single line, so it could feed the Omarchy bar.
-- Log readings to a CSV and compare against `~/thermal-baseline`.
+Same rule as above: each step should run before you start the next one.
+
+**Make the display useful**
+- [ ] **8. Colour.** Temperature green below 68°C, yellow up to 90°C, red above (macfan's thresholds).
+      (Hint: ANSI colour codes, or `@std/fmt/colors`.)
+- [ ] **9. Window stats.** Show min / max / average over the history next to each sparkline.
+- [ ] **10. Fan as % of max.** Read `fan1_max` once at startup and show the fan as a percentage too.
+- [ ] **11. More sensors.** Add the NVMe drive temp and battery temp (`nvme`, `BAT0`).
+      What has to change so adding a sensor is one line, not a copy-pasted function?
+
+**Make it configurable**
+- [ ] **12. Command-line flags.** `--interval 2`, `--width 60`, `--sensors cpu,fan`.
+      (Hint: `Deno.args`, or `parseArgs` from `@std/cli`.) What happens with `--interval banana`?
+- [ ] **13. `--help`.** Print usage and exit.
+- [ ] **14. `--once` mode.** Print one compact line and exit, so the Omarchy bar could run it.
+
+**Make it save and compare**
+- [ ] **15. CSV logging.** `--log thermal.csv` appends a timestamped row each tick.
+- [ ] **16. Replay.** `fanspark replay thermal.csv` draws sparklines from a saved log instead of live sensors.
+      (Your `fetchData` / `sparkline` split pays off here.)
+- [ ] **17. Compare runs.** Summarise two CSVs side by side, e.g. a fresh run against
+      `~/thermal-baseline/before-2026-10-03-2116.csv`. Check that file's columns first.
+
+**Make it solid**
+- [ ] **18. Tests.** `deno test` for `sparkline()` (the edge cases you already found: clamping,
+      `min === max`, `NaN`, empty array) and for the CSV parsing.
+- [ ] **19. Fake sensors.** Let tests or a `--demo` flag use made-up readings, so it runs on a
+      machine without `applesmc`. (Hint: pass the "read a sensor" function in, instead of calling
+      `Deno.readTextFile` directly.)
+- [ ] **20. Install it.** `deno compile` into a single `fanspark` binary and put it on your PATH.
+
+**Finish**
+- [ ] **21. Write the real README** for Boot.dev, in your own words: what it does, why you built it
+      (the fan saga), how to install and run it (including why it needs `--allow-all`), and a screenshot or GIF.
+      Replace this planning README with it; the checklist can move to `PLAN.md`.
+
+Not every step is required. If one turns into a rabbit hole, skip it.
