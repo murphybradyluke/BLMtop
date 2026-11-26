@@ -25,17 +25,18 @@ throw new Error(`${nameText} not found`)
 }
 
 const fetchData = async (tempDir: string, fanDir: string) => {
-    try {
-        const coreTemp = await getCoreTemp(tempDir);
-        const fanSpeed = await getFanSpeed(fanDir);
-        return `CPU  ${coreTemp}\u00B0C\nFan  ${fanSpeed} rpm`
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-};
+  const coreTemp = await getCoreTemp(tempDir);
+  const fanSpeed = await getFanSpeed(fanDir);
+  return {coreTemp, fanSpeed}
+}
 
 async function tick (){
-  console.log(await fetchData(coreTempDir, fanSpeedDir))
+  try{
+  const dataObject = await fetchData(coreTempDir, fanSpeedDir)
+  console.log(`CPU  ${dataObject.coreTemp}\u00b0C\nFan  ${dataObject.fanSpeed} rpm`)
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 }
 
 const pollData = () => {
