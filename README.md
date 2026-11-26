@@ -1,4 +1,4 @@
-# fanspark
+# BLMtop
 
 A small terminal tool that shows the MacBook's CPU temperature and fan speed
 as live sparklines, like this:
