@@ -1,5 +1,8 @@
 const coreTempDir = await getSensorPath("coretemp");
 const fanSpeedDir = await getSensorPath("applesmc");
+const cpuHistory: number[] = [];
+const fanHistory: number[] = [];
+const WIDTH = 40;
 
 async function getCoreTemp(dir: string): Promise<number> {
   const rawTemp: string = await Deno.readTextFile(`${dir}/temp1_input`);
@@ -29,10 +32,20 @@ const fetchData = async (tempDir: string, fanDir: string) => {
   return { coreTemp, fanSpeed };
 };
 
+function historyAddAndDrop(sensorHistory: number[], sensorData: number): void {
+  if (sensorHistory.length === WIDTH) {
+    sensorHistory.shift();
+  }
+  sensorHistory.push(sensorData);
+}
+
 async function tick() {
   try {
     const { coreTemp, fanSpeed } = await fetchData(coreTempDir, fanSpeedDir);
-    console.log(`CPU  ${coreTemp}\u00b0C\nFan  ${fanSpeed} rpm`);
+    historyAddAndDrop(cpuHistory, coreTemp);
+    historyAddAndDrop(fanHistory, fanSpeed);
+    console.log(`CPU  ${coreTemp}\u00b0C ${sparkline(cpuHistory, 60, 105)}`);
+    console.log(`Fan  ${fanSpeed} rpm ${sparkline(fanHistory, 1000, 6200)}`);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
@@ -64,5 +77,4 @@ function sparkline(values: number[], min: number, max: number): string {
   return bars.join("");
 }
 
-console.log(sparkline([60, 65, 70, 75, 80, 85, 90], 60, 90));
 pollData();
