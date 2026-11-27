@@ -44,7 +44,7 @@ Each step should run and print something before you start the next one.
 - [x] **4. Sparkline function.** Write `sparkline(values: number[], min: number, max: number): string`
       using the characters `▁▂▃▄▅▆▇█`. Test it on a hard-coded array before wiring it up.
 - [x] **5. History.** Keep the last 40 readings of each in an array. Drop the oldest when it's full.
-- [ ] **6. Redraw in place.** Instead of scrolling, redraw the same two lines each tick.
+- [x] **6. Redraw in place.** Instead of scrolling, redraw the same two lines each tick.
       (Hint: ANSI escape codes. `\x1b[2J\x1b[H` clears and moves to the top.)
 - [ ] **7. Quit cleanly.** Ctrl+C should leave the terminal tidy.
 

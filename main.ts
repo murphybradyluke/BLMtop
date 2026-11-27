@@ -2,7 +2,10 @@ const coreTempDir = await getSensorPath("coretemp");
 const fanSpeedDir = await getSensorPath("applesmc");
 const cpuHistory: number[] = [];
 const fanHistory: number[] = [];
+let lastError: string | null = null;
 const WIDTH = 40;
+const VALUEWIDTH = 5;
+const UNITWIDTH = 4;
 
 async function getCoreTemp(dir: string): Promise<number> {
   const rawTemp: string = await Deno.readTextFile(`${dir}/temp1_input`);
@@ -39,22 +42,54 @@ function historyAddAndDrop(sensorHistory: number[], sensorData: number): void {
   sensorHistory.push(sensorData);
 }
 
+function render(
+  cpuValue: number[],
+  fanValue: number[],
+  errorValue: string | null,
+): void {
+  const lines: string[] = [
+    `CPU ${formatLatest(cpuValue, VALUEWIDTH, "\u00B0C", UNITWIDTH)} ${sparkline(cpuValue, 60, 105)}`,
+    `Fan ${formatLatest(fanValue, VALUEWIDTH, "rpm", UNITWIDTH)} ${sparkline(fanValue, 1000, 6200)}`,
+  ];
+
+  if (errorValue != null) {
+    lines.push(errorValue);
+  }
+
+  const message = lines.join("\n");
+  console.log(`\x1b[2J\x1b[H${message}`);
+}
+
 async function tick() {
   try {
     const { coreTemp, fanSpeed } = await fetchData(coreTempDir, fanSpeedDir);
     historyAddAndDrop(cpuHistory, coreTemp);
     historyAddAndDrop(fanHistory, fanSpeed);
-    console.log(`CPU  ${coreTemp}\u00b0C ${sparkline(cpuHistory, 60, 105)}`);
-    console.log(`Fan  ${fanSpeed} rpm ${sparkline(fanHistory, 1000, 6200)}`);
-  } catch (error) {
-    console.error("Error fetching data:", error);
+    lastError = null;
+  } catch (e) {
+    const timestamp: string = new Date().toLocaleTimeString();
+    if (e instanceof Error) {
+      lastError = `${timestamp}: ${e.message}`;
+    } else {
+      lastError = `${timestamp}: ${String(e)}`;
+    }
   }
+  render(cpuHistory, fanHistory, lastError);
 }
 
 const pollData = () => {
   tick();
   setInterval(tick, 1000);
 };
+
+function formatLatest(
+  history: number[],
+  historyWidth: number,
+  unit: string,
+  unitWidth: number,
+): string {
+  return `${String(history.at(-1) ?? "?").padStart(historyWidth)} ${unit.padEnd(unitWidth)}`;
+}
 
 function sparkline(values: number[], min: number, max: number): string {
   const range = max - min;
