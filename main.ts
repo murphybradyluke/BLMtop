@@ -79,7 +79,7 @@ async function tick() {
 
 const pollData = () => {
   tick();
-  setInterval(tick, 1000);
+  return setInterval(tick, 1000);
 };
 
 function formatLatest(
@@ -111,5 +111,13 @@ function sparkline(values: number[], min: number, max: number): string {
   }
   return bars.join("");
 }
+function clearOnQuit(): void {
+  clearInterval(intervalId);
+  console.log(`\x1b[?1049l\x1b[?25h`);
+  Deno.exit(0);
+}
 
-pollData();
+console.log(`\x1b[?1049h\x1b[?25l`);
+const intervalId = pollData();
+
+Deno.addSignalListener("SIGINT", clearOnQuit);

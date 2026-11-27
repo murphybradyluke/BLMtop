@@ -46,7 +46,7 @@ Each step should run and print something before you start the next one.
 - [x] **5. History.** Keep the last 40 readings of each in an array. Drop the oldest when it's full.
 - [x] **6. Redraw in place.** Instead of scrolling, redraw the same two lines each tick.
       (Hint: ANSI escape codes. `\x1b[2J\x1b[H` clears and moves to the top.)
-- [ ] **7. Quit cleanly.** Ctrl+C should leave the terminal tidy.
+- [x] **7. Quit cleanly.** Ctrl+C should leave the terminal tidy.
 
 ## Growing it into the Boot.dev personal project (~40 hours)
 
